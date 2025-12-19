@@ -44,6 +44,9 @@ export default function Login() {
 
     setLoading(true);
     try {
+      // 📍 Step 1: Log login attempt
+      console.log('🔐 [LOGIN] Attempting login for:', { identifier, role: selectedRole });
+      
       const res = await apiRequest('POST', '/api/login', {
         id: identifier,
         password,
@@ -51,7 +54,21 @@ export default function Login() {
       });
 
       const user = await res.json();
+      
+      // 📍 Step 2: Log API response
+      console.log('✅ [LOGIN] API Response received:', { 
+        id: user.id, 
+        role: user.role, 
+        name: user.name,
+        additional_roles: user.additional_roles,
+        fullUser: user 
+      });
+      
       localStorage.setItem('currentUser', JSON.stringify(user));
+      
+      // 📍 Step 3: Verify localStorage
+      const storedUser = localStorage.getItem('currentUser');
+      console.log('💾 [LOGIN] Stored in localStorage:', JSON.parse(storedUser || '{}'));
 
       toast({
         title: "Success",
@@ -65,10 +82,11 @@ export default function Login() {
           'faculty': '/faculty/dashboard',
         };
         const targetPath = roleMap[user.role] || '/';
-        console.log('🔐 Login successful. Redirecting to:', targetPath);
+        console.log('🔐 [LOGIN] Role mapping result:', { userRole: user.role, targetPath });
+        console.log('🔐 [LOGIN] Redirecting to:', targetPath);
         setLocation(targetPath);
       } catch (navError) {
-        console.error('❌ Navigation error:', navError);
+        console.error('❌ [LOGIN] Navigation error:', navError);
         toast({
           title: "Navigation Error",
           description: "Failed to redirect. Please refresh the page.",
@@ -76,6 +94,7 @@ export default function Login() {
         });
       }
     } catch (error) {
+      console.error('❌ [LOGIN] Error:', error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Login failed",
