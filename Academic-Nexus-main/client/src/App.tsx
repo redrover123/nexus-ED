@@ -28,10 +28,17 @@ interface NavCard {
   items: { label: string; href: string }[];
 }
 
-function ProtectedRoute({ component: Component, requiredRole }: { component: any, requiredRole: 'student' | 'faculty' | 'admin' }) {
+function ProtectedRoute({ 
+  requiredRole, 
+  children 
+}: { 
+  requiredRole: 'student' | 'faculty' | 'admin',
+  children: React.ReactNode
+}) {
   const currentUserJson = localStorage.getItem('currentUser');
   
   if (!currentUserJson) {
+    console.warn('⚠️ No user found in localStorage, redirecting to login');
     return <Redirect to="/" />;
   }
 
@@ -44,10 +51,12 @@ function ProtectedRoute({ component: Component, requiredRole }: { component: any
       'faculty': '/faculty/dashboard',
       'admin': '/admin/dashboard',
     };
+    console.warn(`⚠️ Role mismatch. User role: ${currentUser.role}, Required: ${requiredRole}. Redirecting...`);
     return <Redirect to={roleMap[currentUser.role] || '/'} />;
   }
 
-  return <Component />;
+  console.log(`✅ Access granted for role: ${requiredRole}`);
+  return <>{children}</>;
 }
 
 function Router() {
@@ -61,26 +70,41 @@ function Router() {
       
       {/* Student Routes */}
       <Route path="/student/*">
-        <ProtectedRoute 
-          component={() => currentUser ? <MainLayout user={currentUser}><StudentDashboard /></MainLayout> : <Login />} 
-          requiredRole="student" 
-        />
+        {currentUser ? (
+          <ProtectedRoute requiredRole="student">
+            <MainLayout user={currentUser}>
+              <StudentDashboard />
+            </MainLayout>
+          </ProtectedRoute>
+        ) : (
+          <Login />
+        )}
       </Route>
 
       {/* Faculty Routes */}
       <Route path="/faculty/*">
-        <ProtectedRoute 
-          component={() => currentUser ? <MainLayout user={currentUser}><AdminDashboard /></MainLayout> : <Login />} 
-          requiredRole="faculty" 
-        />
+        {currentUser ? (
+          <ProtectedRoute requiredRole="faculty">
+            <MainLayout user={currentUser}>
+              <AdminDashboard />
+            </MainLayout>
+          </ProtectedRoute>
+        ) : (
+          <Login />
+        )}
       </Route>
 
       {/* Admin Routes */}
       <Route path="/admin/*">
-        <ProtectedRoute 
-          component={() => currentUser ? <MainLayout user={currentUser}><AdminDashboard /></MainLayout> : <Login />} 
-          requiredRole="admin" 
-        />
+        {currentUser ? (
+          <ProtectedRoute requiredRole="admin">
+            <MainLayout user={currentUser}>
+              <AdminDashboard />
+            </MainLayout>
+          </ProtectedRoute>
+        ) : (
+          <Login />
+        )}
       </Route>
 
       {/* Redirect /seating-manager to /faculty/seating */}
