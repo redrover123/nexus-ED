@@ -1,28 +1,53 @@
 import { storage } from "./storage";
-import crypto from "crypto";
-
-function hashPassword(password: string): string {
-  return crypto.createHash("sha256").update(password).digest("hex");
-}
 
 async function seed() {
   console.log("🌱 Seeding database...");
 
-  // Create exactly one default Admin user
-  const adminPassword = hashPassword("admin");
-  
   try {
+    // Create default Admin user
     await storage.createUser({
+      id: "admin",
       name: "System Admin",
-      role: "Admin",
-      identifier: "admin",
-      dob: "01011990", // Placeholder DDMMYYYY
-      password_hash: adminPassword,
-      is_first_login: false, // Admin doesn't need to change password on first login
+      role: "admin",
+      password: "admin",
+      dob: "01011990",
+      academic_status: "active",
     });
-    console.log("✓ Created default Admin user");
+    console.log("✓ Created default Admin user (ID: admin, Password: admin)");
   } catch (error) {
     console.log("✓ Admin user already exists");
+  }
+
+  try {
+    // Create sample Student user
+    await storage.createUser({
+      id: "R101",
+      name: "John Student",
+      role: "student",
+      password: "10011999", // DDMMYYYY format
+      department: "Computer Science",
+      year: 2,
+      academic_status: "active",
+    });
+    console.log("✓ Created sample Student user (ID: R101, Password: 10011999)");
+  } catch (error) {
+    console.log("✓ Student user already exists");
+  }
+
+  try {
+    // Create sample Faculty user
+    await storage.createUser({
+      id: "FAC001",
+      name: "Dr. Jane Faculty",
+      role: "faculty",
+      password: "faculty123",
+      designation: "Associate Professor",
+      department: "Computer Science",
+      academic_status: "active",
+    });
+    console.log("✓ Created sample Faculty user (ID: FAC001, Password: faculty123)");
+  } catch (error) {
+    console.log("✓ Faculty user already exists");
   }
 
   console.log("\n✅ Database seeded successfully!");
