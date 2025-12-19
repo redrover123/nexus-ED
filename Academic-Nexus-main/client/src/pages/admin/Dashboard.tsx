@@ -21,6 +21,14 @@ export default function AdminDashboard() {
   const { events } = useEvents();
   const { toast } = useToast();
 
+  // 📍 Debug: Component mount for admin
+  useEffect(() => {
+    console.log('👑 [ADMIN_DASHBOARD] Component mounted');
+    const currentUserJson = localStorage.getItem('currentUser');
+    const currentUser = currentUserJson ? JSON.parse(currentUserJson) : null;
+    console.log('👑 [ADMIN_DASHBOARD] Current user:', currentUser);
+  }, []);
+
   const handleToggle = async (checked: boolean) => {
     await toggleExamModeApi(checked);
     toast({

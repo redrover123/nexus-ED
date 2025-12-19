@@ -82,6 +82,14 @@ function Router() {
   const currentUserJson = localStorage.getItem('currentUser');
   const currentUser = currentUserJson ? JSON.parse(currentUserJson) as CurrentUser : null;
 
+  // 📍 Debug: Log every time Router renders
+  console.log('🔄 [ROUTER] Re-rendering. Current user:', {
+    exists: !!currentUser,
+    id: currentUser?.id,
+    role: currentUser?.role,
+    storageContent: currentUserJson ? 'EXISTS' : 'MISSING'
+  });
+
   return (
     <Switch>
       <Route path="/" component={Login} />
