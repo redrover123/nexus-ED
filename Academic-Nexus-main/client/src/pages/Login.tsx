@@ -58,12 +58,23 @@ export default function Login() {
         description: `Logged in as ${user.id}`,
       });
 
-      const roleMap: Record<string, string> = {
-        'student': '/student/dashboard',
-        'admin': '/admin/dashboard',
-        'faculty': '/faculty/dashboard',
-      };
-      setLocation(roleMap[user.role] || '/');
+      try {
+        const roleMap: Record<string, string> = {
+          'student': '/student/dashboard',
+          'admin': '/admin/dashboard',
+          'faculty': '/faculty/dashboard',
+        };
+        const targetPath = roleMap[user.role] || '/';
+        console.log('🔐 Login successful. Redirecting to:', targetPath);
+        setLocation(targetPath);
+      } catch (navError) {
+        console.error('❌ Navigation error:', navError);
+        toast({
+          title: "Navigation Error",
+          description: "Failed to redirect. Please refresh the page.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       toast({
         title: "Error",
