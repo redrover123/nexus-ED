@@ -96,7 +96,19 @@ export const systemConfig = pgTable("system_config", {
 });
 
 // Insert Schemas
-export const insertUserSchema = createInsertSchema(users).omit({ id: true });
+export const insertUserSchema = createInsertSchema(users).pick({ 
+  id: true, 
+  role: true, 
+  password: true, 
+  name: true, 
+  department: true, 
+  year: true, 
+  dob: true, 
+  club_name: true, 
+  academic_status: true, 
+  additional_roles: true, 
+  designation: true 
+}).required({ id: true, role: true, password: true, name: true });
 export const insertEventSchema = createInsertSchema(events).omit({ id: true, createdAt: true });
 export const insertExamSchema = createInsertSchema(exams).omit({ id: true });
 export const insertRoomSchema = createInsertSchema(rooms).omit({ id: true });
