@@ -1,0 +1,102 @@
+1. Student Navigation & Pages
+Theme: "Study, Pass, Participate"
+
+The 3 Nav Cards (Horizontal):
+
+Card 1: Academics
+
+Link 1: Smart Syllabus (The Mind Map Generator).
+
+Link 2: My Results (View Grades/Credit Status).
+
+Card 2: Examination
+
+Link 1: Hall Ticket (The QR Code download - Blocked if Detained).
+
+Link 2: Seating Plan (Check which room/seat is assigned).
+
+Card 3: Campus Life
+
+Link 1: Upcoming Events (Calendar).
+
+Link 2 (Dynamic): Club Admin (Visible only if 'Club President' or 'VP').
+
+Required Pages:
+
+/student/mindmap (React Flow integration)
+
+/student/ticket (PDF generation logic)
+
+/student/seating (Simple table view)
+
+/student/events (Event feed)
+
+/student/club-admin (Form to post new events - for Presidents only)
+
+2. Faculty Navigation & Pages
+Theme: "Teach, Invigilate, Mentor"
+
+The 3 Nav Cards (Horizontal):
+
+Card 1: Classroom
+
+Link 1: Attendance (Mark daily attendance).
+
+Link 2 (Dynamic): Syllabus Manager (Visible only if 'Course Incharge' - Upload PDFs here).
+
+Card 2: Exam Duty
+
+Link 1: My Schedule (Invigilation dates).
+
+Link 2 (Dynamic): Seating Algorithm (Visible only if 'Seating Manager' - The Auto-Allocator).
+
+Card 3: Student Affairs
+
+Link 1: Mentorship (View assigned students).
+
+Link 2 (Dynamic): Club Coordinator (Visible only if 'Club Coordinator' - Approve event requests).
+
+Required Pages:
+
+/faculty/attendance (List of students)
+
+/faculty/syllabus (File upload to syllabus_docs table)
+
+/faculty/invigilation (Read-only schedule)
+
+/faculty/seating-algo (The "Generate Seating" button and Grid View)
+
+/faculty/club-approvals (Approve/Reject student event requests)
+
+3. Admin Navigation & Pages
+Theme: "Control, Configure, Monitor"
+
+The 3 Nav Cards (Horizontal):
+
+Card 1: User Command
+
+Link 1: Manage Users (The Master Table: Add/Edit/Delete).
+
+Link 2: Role Assignment (Toggle "Seating Mgr", "Club Pres", etc.).
+
+Card 2: Exam Logistics
+
+Link 1: Bulk Upload (The "Drag & Drop" Hall Ticket Mapper).
+
+Link 2: Exam Schedule (Set dates for exams).
+
+Card 3: System Intelligence
+
+Link 1: Delivery Reports (See which hall tickets failed to map).
+
+Link 2: System Logs (Who logged in when).
+
+Required Pages:
+
+/admin/users (Table with "Detain" toggle and "Assign Duty" buttons)
+
+/admin/bulk-upload (File input + Regex logic)
+
+/admin/schedule (Calendar input)
+
+/admin/reports (Success/Failure charts)

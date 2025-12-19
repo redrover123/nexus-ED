@@ -1,10 +1,5 @@
 import React from 'react';
-import { CardNav } from '@/components/CardNav';
-
-interface NavCard {
-  title: string;
-  items: { label: string; href: string }[];
-}
+import CardNav, { CardNavItem } from '@/components/CardNav';
 
 interface CurrentUser {
   id: string;
@@ -16,93 +11,10 @@ interface CurrentUser {
 interface MainLayoutProps {
   children: React.ReactNode;
   user: CurrentUser;
+  navItems?: CardNavItem[];
 }
 
-const getNavItems = (user: CurrentUser): NavCard[] => {
-  if (!user) return [];
-
-  const additionalRoles = user.additional_roles || [];
-
-  switch (user.role) {
-    case 'student':
-      return [
-        {
-          title: 'Academics',
-          items: [
-            { label: 'Mind Map', href: '/student/mindmap' },
-            { label: 'Results', href: '/student/results' },
-          ],
-        },
-        {
-          title: 'Exams',
-          items: [
-            { label: 'Hall Ticket', href: '/student/ticket' },
-            { label: 'Seating Plan', href: '/student/seating' },
-          ],
-        },
-        {
-          title: 'Extra',
-          items: additionalRoles.includes('club_coordinator')
-            ? [{ label: 'Manage Club Events', href: '/student/events' }]
-            : [{ label: 'Campus Events', href: '/student/events' }],
-        },
-      ];
-
-    case 'faculty':
-      return [
-        {
-          title: 'Classroom',
-          items: [
-            { label: 'Attendance', href: '/faculty/attendance' },
-            { label: 'My Schedule', href: '/faculty/schedule' },
-          ],
-        },
-        {
-          title: 'Profile',
-          items: additionalRoles.includes('seating_manager')
-            ? [{ label: 'Allocate Seating', href: '/faculty/seating' }]
-            : [{ label: 'Service Record', href: '/faculty/service' }],
-        },
-        {
-          title: 'Exam Duty',
-          items: [
-            { label: 'Invigilation Schedule', href: '/faculty/invigilation' },
-          ],
-        },
-      ];
-
-    case 'admin':
-      return [
-        {
-          title: 'People',
-          items: [
-            { label: 'Manage Students', href: '/admin/students' },
-            { label: 'Manage Faculty', href: '/admin/faculty' },
-            { label: 'Assign Duties', href: '/admin/duties' },
-          ],
-        },
-        {
-          title: 'Exams',
-          items: [
-            { label: 'Bulk Hall Ticket Upload', href: '/admin/tickets' },
-            { label: 'Exam Schedule', href: '/admin/schedule' },
-          ],
-        },
-        {
-          title: 'System',
-          items: [
-            { label: 'Reports', href: '/admin/reports' },
-            { label: 'Settings', href: '/admin/settings' },
-          ],
-        },
-      ];
-
-    default:
-      return [];
-  }
-};
-
-export const MainLayout: React.FC<MainLayoutProps> = ({ children, user }) => {
+export const MainLayout: React.FC<MainLayoutProps> = ({ children, user, navItems = [] }) => {
   if (!user) {
     return (
       <div className="w-full min-h-screen flex items-center justify-center">
@@ -113,19 +25,28 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, user }) => {
     );
   }
 
-  const navItems = getNavItems(user);
-  // Ensure we always have at least a default Home card
-  const itemsToDisplay = navItems.length > 0 ? navItems : [
-    {
-      title: 'Home',
-      items: [{ label: 'Dashboard', href: `/${user.role}/dashboard` }],
-    },
-  ];
+  const handleLogout = () => {
+    localStorage.clear();
+    window.location.href = '/';
+  };
+
+  // Display nav items or empty array if none provided
+  const itemsToDisplay = navItems && navItems.length > 0 ? navItems : [];
 
   return (
-    <div className="w-full min-h-screen">
+    <div className="w-full min-h-screen bg-black">
       {/* Floating Navigation Cards */}
-      <CardNav items={itemsToDisplay} />
+      {itemsToDisplay.length > 0 && (
+        <CardNav 
+          items={itemsToDisplay}
+          logo="Nexus"
+          baseColor="rgba(0, 0, 0, 0.9)"
+          menuColor="#fff"
+          buttonBgColor="rgba(255, 255, 255, 0.1)"
+          buttonTextColor="#fff"
+          onLogout={handleLogout}
+        />
+      )}
       
       {/* Content Container - Padded so Nav doesn't overlap */}
       <div className="pt-32 px-6 pb-12 max-w-7xl mx-auto">

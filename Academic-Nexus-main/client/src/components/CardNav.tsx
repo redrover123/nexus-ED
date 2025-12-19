@@ -1,44 +1,82 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { GoArrowUpRight } from 'react-icons/go';
-import { LogOut } from 'lucide-react';
-import { useLocation } from 'wouter';
 import './CardNav.css';
 
-interface NavItem {
+export type CardNavLink = {
   label: string;
   href: string;
-}
+  ariaLabel: string;
+};
 
-interface NavCard {
-  title: string;
-  items: NavItem[];
-}
+export type CardNavItem = {
+  label: string;
+  bgColor: string;
+  textColor: string;
+  links: CardNavLink[];
+};
 
-interface CardNavProps {
-  items: NavCard[];
+export interface CardNavProps {
+  logo?: React.ReactNode;
+  items: CardNavItem[];
   className?: string;
+  ease?: string;
+  baseColor?: string;
+  menuColor?: string;
+  buttonBgColor?: string;
+  buttonTextColor?: string;
+  onLogout?: () => void;
 }
 
-export const CardNav = ({ items, className = '' }: CardNavProps) => {
+const CardNav: React.FC<CardNavProps> = ({
+  logo,
+  items,
+  className = '',
+  ease = 'power3.out',
+  baseColor = '#000',
+  menuColor,
+  buttonBgColor,
+  buttonTextColor,
+  onLogout
+}) => {
+  const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const navRef = useRef<HTMLElement>(null);
+  const navRef = useRef<HTMLDivElement | null>(null);
   const cardsRef = useRef<HTMLDivElement[]>([]);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
-  const [, setLocation] = useLocation();
 
   const calculateHeight = () => {
     const navEl = navRef.current;
     if (!navEl) return 260;
 
-    const contentEl = navEl.querySelector('.card-nav-content') as HTMLElement;
-    if (contentEl) {
-      const topBar = 60;
-      const padding = 16;
-      const contentHeight = contentEl.scrollHeight;
-      return topBar + contentHeight + padding;
-    }
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    if (isMobile) {
+      const contentEl = navEl.querySelector('.card-nav-content') as HTMLElement;
+      if (contentEl) {
+        const wasVisible = contentEl.style.visibility;
+        const wasPointerEvents = contentEl.style.pointerEvents;
+        const wasPosition = contentEl.style.position;
+        const wasHeight = contentEl.style.height;
 
+        contentEl.style.visibility = 'visible';
+        contentEl.style.pointerEvents = 'auto';
+        contentEl.style.position = 'static';
+        contentEl.style.height = 'auto';
+
+        contentEl.offsetHeight;
+
+        const topBar = 60;
+        const padding = 16;
+        const contentHeight = contentEl.scrollHeight;
+
+        contentEl.style.visibility = wasVisible;
+        contentEl.style.pointerEvents = wasPointerEvents;
+        contentEl.style.position = wasPosition;
+        contentEl.style.height = wasHeight;
+
+        return topBar + contentHeight + padding;
+      }
+    }
     return 260;
   };
 
@@ -50,8 +88,14 @@ export const CardNav = ({ items, className = '' }: CardNavProps) => {
     gsap.set(cardsRef.current, { y: 50, opacity: 0 });
 
     const tl = gsap.timeline({ paused: true });
-    tl.to(navEl, { height: calculateHeight, duration: 0.4, ease: 'power3.out' });
-    tl.to(cardsRef.current, { y: 0, opacity: 1, duration: 0.4, ease: 'power3.out', stagger: 0.08 }, '-=0.1');
+
+    tl.to(navEl, {
+      height: calculateHeight,
+      duration: 0.4,
+      ease
+    });
+
+    tl.to(cardsRef.current, { y: 0, opacity: 1, duration: 0.4, ease, stagger: 0.08 }, '-=0.1');
 
     return tl;
   };
@@ -59,18 +103,21 @@ export const CardNav = ({ items, className = '' }: CardNavProps) => {
   useLayoutEffect(() => {
     const tl = createTimeline();
     tlRef.current = tl;
+
     return () => {
       tl?.kill();
       tlRef.current = null;
     };
-  }, [items]);
+  }, [ease, items]);
 
   useLayoutEffect(() => {
     const handleResize = () => {
       if (!tlRef.current) return;
+
       if (isExpanded) {
         const newHeight = calculateHeight();
         gsap.set(navRef.current, { height: newHeight });
+
         tlRef.current.kill();
         const newTl = createTimeline();
         if (newTl) {
@@ -80,7 +127,9 @@ export const CardNav = ({ items, className = '' }: CardNavProps) => {
       } else {
         tlRef.current.kill();
         const newTl = createTimeline();
-        if (newTl) tlRef.current = newTl;
+        if (newTl) {
+          tlRef.current = newTl;
+        }
       }
     };
 
@@ -91,80 +140,83 @@ export const CardNav = ({ items, className = '' }: CardNavProps) => {
   const toggleMenu = () => {
     const tl = tlRef.current;
     if (!tl) return;
-
     if (!isExpanded) {
+      setIsHamburgerOpen(true);
       setIsExpanded(true);
       tl.play(0);
     } else {
+      setIsHamburgerOpen(false);
       tl.eventCallback('onReverseComplete', () => setIsExpanded(false));
       tl.reverse();
     }
   };
 
-  const handleLinkClick = (href: string) => {
-    setLocation(href);
-    toggleMenu();
+  const setCardRef = (i: number) => (el: HTMLDivElement | null) => {
+    if (el) cardsRef.current[i] = el;
   };
 
-  const handleLogout = () => {
-    localStorage.clear();
-    window.location.reload();
+  const handleNavClick = (href: string) => {
+    if (href.startsWith('/')) {
+      window.location.href = href;
+    }
   };
 
   return (
     <div className={`card-nav-container ${className}`}>
-      <nav
-        ref={navRef}
-        className={`card-nav ${isExpanded ? 'open' : ''}`}
-      >
+      <nav ref={navRef} className={`card-nav ${isExpanded ? 'open' : ''}`} style={{ backgroundColor: baseColor }}>
         <div className="card-nav-top">
-          <div className="card-nav-hamburger" onClick={toggleMenu} data-testid="button-nav-toggle">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor">
-              {isExpanded ? (
-                <>
-                  <line x1="4" y1="4" x2="16" y2="16" strokeWidth="2" />
-                  <line x1="16" y1="4" x2="4" y2="16" strokeWidth="2" />
-                </>
-              ) : (
-                <>
-                  <line x1="3" y1="5" x2="17" y2="5" strokeWidth="2" />
-                  <line x1="3" y1="10" x2="17" y2="10" strokeWidth="2" />
-                  <line x1="3" y1="15" x2="17" y2="15" strokeWidth="2" />
-                </>
-              )}
-            </svg>
-          </div>
-          <button 
-            onClick={handleLogout}
-            className="card-nav-logout"
-            data-testid="button-logout"
-            title="Logout"
+          <div
+            className={`hamburger-menu ${isHamburgerOpen ? 'open' : ''}`}
+            onClick={toggleMenu}
+            role="button"
+            aria-label={isExpanded ? 'Close menu' : 'Open menu'}
+            tabIndex={0}
+            style={{ color: menuColor || '#fff' }}
           >
-            <LogOut className="w-5 h-5" />
+            <div className="hamburger-line" />
+            <div className="hamburger-line" />
+          </div>
+
+          <div className="logo-container">
+            {typeof logo === 'string' ? (
+              <img src={logo} alt="Logo" className="logo" />
+            ) : (
+              <div className="logo-text">{logo || 'Nexus'}</div>
+            )}
+          </div>
+
+          <button
+            type="button"
+            className="card-nav-cta-button"
+            style={{ backgroundColor: buttonBgColor, color: buttonTextColor }}
+            onClick={onLogout}
+          >
+            Logout
           </button>
         </div>
 
-        <div className="card-nav-content">
-          {items.map((card, cardIndex) => (
+        <div className="card-nav-content" aria-hidden={!isExpanded}>
+          {(items || []).slice(0, 3).map((item, idx) => (
             <div
-              key={cardIndex}
-              ref={(el) => {
-                if (el) cardsRef.current[cardIndex] = el;
-              }}
+              key={`${item.label}-${idx}`}
               className="nav-card"
+              ref={setCardRef(idx)}
+              style={{ backgroundColor: item.bgColor, color: item.textColor }}
             >
-              <div className="nav-card-title">{card.title}</div>
+              <div className="nav-card-label">{item.label}</div>
               <div className="nav-card-links">
-                {card.items.map((item, itemIndex) => (
-                  <button
-                    key={itemIndex}
-                    onClick={() => handleLinkClick(item.href)}
-                    className="nav-link"
-                    data-testid={`link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                {item.links?.map((lnk, i) => (
+                  <div
+                    key={`${lnk.label}-${i}`}
+                    className="nav-card-link"
+                    onClick={() => handleNavClick(lnk.href)}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={lnk.ariaLabel}
                   >
-                    <span>{item.label}</span>
-                    <GoArrowUpRight className="nav-link-arrow" />
-                  </button>
+                    <GoArrowUpRight className="nav-card-link-icon" aria-hidden="true" />
+                    {lnk.label}
+                  </div>
                 ))}
               </div>
             </div>
@@ -174,3 +226,5 @@ export const CardNav = ({ items, className = '' }: CardNavProps) => {
     </div>
   );
 };
+
+export default CardNav;

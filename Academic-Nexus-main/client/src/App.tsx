@@ -9,6 +9,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Login from "@/pages/Login";
 import ChangePassword from "@/pages/ChangePassword";
 import NotFound from "@/pages/not-found";
+import { CardNavItem } from "@/components/CardNav";
 
 // Placeholder Pages
 import StudentDashboard from "@/pages/student/Dashboard";
@@ -23,10 +24,106 @@ interface CurrentUser {
   additional_roles?: string[];
 }
 
-interface NavCard {
-  title: string;
-  items: { label: string; href: string }[];
-}
+// Role-based navigation configuration
+const getNavItemsForRole = (role: 'student' | 'faculty' | 'admin'): CardNavItem[] => {
+  if (role === 'student') {
+    return [
+      {
+        label: 'Academics',
+        bgColor: '#1a1a2e',
+        textColor: '#fff',
+        links: [
+          { label: 'Smart Syllabus', href: '/student/mindmap', ariaLabel: 'Mind Map Generator' },
+          { label: 'My Results', href: '/student/results', ariaLabel: 'View Grades and Credits' }
+        ]
+      },
+      {
+        label: 'Examination',
+        bgColor: '#16213e',
+        textColor: '#fff',
+        links: [
+          { label: 'Hall Ticket', href: '/student/ticket', ariaLabel: 'Download QR Code Ticket' },
+          { label: 'Seating Plan', href: '/student/seating', ariaLabel: 'Check Seat Assignment' }
+        ]
+      },
+      {
+        label: 'Campus Life',
+        bgColor: '#0f3460',
+        textColor: '#fff',
+        links: [
+          { label: 'Upcoming Events', href: '/student/events', ariaLabel: 'Event Calendar' },
+          { label: 'Club Admin', href: '/student/club-admin', ariaLabel: 'Manage Club Events' }
+        ]
+      }
+    ];
+  }
+  
+  if (role === 'faculty') {
+    return [
+      {
+        label: 'Classroom',
+        bgColor: '#2d3436',
+        textColor: '#fff',
+        links: [
+          { label: 'Attendance', href: '/faculty/attendance', ariaLabel: 'Mark Attendance' },
+          { label: 'Syllabus Manager', href: '/faculty/syllabus', ariaLabel: 'Upload Course Materials' }
+        ]
+      },
+      {
+        label: 'Exam Duty',
+        bgColor: '#3d4d5c',
+        textColor: '#fff',
+        links: [
+          { label: 'My Schedule', href: '/faculty/invigilation', ariaLabel: 'View Duty Schedule' },
+          { label: 'Seating Algorithm', href: '/faculty/seating-algo', ariaLabel: 'Generate Seating' }
+        ]
+      },
+      {
+        label: 'Student Affairs',
+        bgColor: '#4a5568',
+        textColor: '#fff',
+        links: [
+          { label: 'Mentorship', href: '/faculty/mentorship', ariaLabel: 'View Assigned Students' },
+          { label: 'Club Approvals', href: '/faculty/club-approvals', ariaLabel: 'Approve Events' }
+        ]
+      }
+    ];
+  }
+  
+  if (role === 'admin') {
+    return [
+      {
+        label: 'User Command',
+        bgColor: '#1e1e1e',
+        textColor: '#fff',
+        links: [
+          { label: 'Manage Users', href: '/admin/users', ariaLabel: 'User Management' },
+          { label: 'Role Assignment', href: '/admin/roles', ariaLabel: 'Assign Duties' }
+        ]
+      },
+      {
+        label: 'Exam Logistics',
+        bgColor: '#2a2a2a',
+        textColor: '#fff',
+        links: [
+          { label: 'Bulk Upload', href: '/admin/bulk-upload', ariaLabel: 'Upload Hall Tickets' },
+          { label: 'Exam Schedule', href: '/admin/schedule', ariaLabel: 'Set Exam Dates' }
+        ]
+      },
+      {
+        label: 'System Intelligence',
+        bgColor: '#333333',
+        textColor: '#fff',
+        links: [
+          { label: 'Delivery Reports', href: '/admin/reports', ariaLabel: 'View Reports' },
+          { label: 'System Logs', href: '/admin/logs', ariaLabel: 'Activity Logs' }
+        ]
+      }
+    ];
+  }
+  
+  return [];
+};
 
 function ProtectedRoute({ 
   requiredRole, 
@@ -100,7 +197,7 @@ function Router() {
       <Route path="/student/*">
         {currentUser ? (
           <ProtectedRoute requiredRole="student">
-            <MainLayout user={currentUser}>
+            <MainLayout user={currentUser} navItems={getNavItemsForRole('student')}>
               <StudentDashboard />
             </MainLayout>
           </ProtectedRoute>
@@ -113,7 +210,7 @@ function Router() {
       <Route path="/faculty/*">
         {currentUser ? (
           <ProtectedRoute requiredRole="faculty">
-            <MainLayout user={currentUser}>
+            <MainLayout user={currentUser} navItems={getNavItemsForRole('faculty')}>
               <AdminDashboard />
             </MainLayout>
           </ProtectedRoute>
@@ -126,7 +223,7 @@ function Router() {
       <Route path="/admin/*">
         {currentUser ? (
           <ProtectedRoute requiredRole="admin">
-            <MainLayout user={currentUser}>
+            <MainLayout user={currentUser} navItems={getNavItemsForRole('admin')}>
               <AdminDashboard />
             </MainLayout>
           </ProtectedRoute>
