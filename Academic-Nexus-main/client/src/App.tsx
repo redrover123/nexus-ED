@@ -1,4 +1,4 @@
-import { Switch, Route, Redirect } from "wouter";
+import { Switch, Route, Redirect, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -79,11 +79,12 @@ function ProtectedRoute({
 }
 
 function Router() {
+  const [location] = useLocation(); // ✅ This makes Router re-render on location changes
   const currentUserJson = localStorage.getItem('currentUser');
   const currentUser = currentUserJson ? JSON.parse(currentUserJson) as CurrentUser : null;
 
   // 📍 Debug: Log every time Router renders
-  console.log('🔄 [ROUTER] Re-rendering. Current user:', {
+  console.log('🔄 [ROUTER] Re-rendering. Location:', location, 'Current user:', {
     exists: !!currentUser,
     id: currentUser?.id,
     role: currentUser?.role,
