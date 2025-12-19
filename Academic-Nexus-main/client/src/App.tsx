@@ -37,12 +37,24 @@ function ProtectedRoute({
 }) {
   const currentUserJson = localStorage.getItem('currentUser');
   
+  // 📍 Step A: Check if user exists
+  console.log('🛡️ [PROTECTED_ROUTE] Checking access for required role:', requiredRole);
+  console.log('🛡️ [PROTECTED_ROUTE] localStorage content:', currentUserJson ? 'EXISTS' : 'MISSING');
+  
   if (!currentUserJson) {
-    console.warn('⚠️ No user found in localStorage, redirecting to login');
+    console.warn('⚠️ [PROTECTED_ROUTE] No user found in localStorage, redirecting to login');
     return <Redirect to="/" />;
   }
 
   const currentUser: CurrentUser = JSON.parse(currentUserJson);
+  
+  // 📍 Step B: Log parsed user
+  console.log('🛡️ [PROTECTED_ROUTE] Parsed user from localStorage:', {
+    id: currentUser.id,
+    role: currentUser.role,
+    name: currentUser.name,
+    additional_roles: currentUser.additional_roles
+  });
 
   // If role doesn't match, redirect to their correct dashboard
   if (currentUser.role !== requiredRole) {
@@ -51,11 +63,18 @@ function ProtectedRoute({
       'faculty': '/faculty/dashboard',
       'admin': '/admin/dashboard',
     };
-    console.warn(`⚠️ Role mismatch. User role: ${currentUser.role}, Required: ${requiredRole}. Redirecting...`);
+    console.warn(`⚠️ [PROTECTED_ROUTE] Role mismatch. User role: "${currentUser.role}", Required: "${requiredRole}". Redirecting...`);
+    console.log('🛡️ [PROTECTED_ROUTE] Role comparison:', { 
+      userRole: currentUser.role, 
+      userRoleType: typeof currentUser.role,
+      requiredRole, 
+      requiredRoleType: typeof requiredRole,
+      match: currentUser.role === requiredRole 
+    });
     return <Redirect to={roleMap[currentUser.role] || '/'} />;
   }
 
-  console.log(`✅ Access granted for role: ${requiredRole}`);
+  console.log(`✅ [PROTECTED_ROUTE] Access granted for role: ${requiredRole}. Rendering children.`);
   return <>{children}</>;
 }
 

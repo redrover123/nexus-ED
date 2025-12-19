@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -218,6 +218,28 @@ const HallTicket = () => {
 export default function StudentDashboard() {
   const { examMode } = useApp();
   const { toast } = useToast();
+
+  // 📍 Debug: Component mount and user check
+  useEffect(() => {
+    console.log('📊 [STUDENT_DASHBOARD] Component mounted');
+    
+    const currentUserJson = localStorage.getItem('currentUser');
+    const currentUser = currentUserJson ? JSON.parse(currentUserJson) : null;
+    
+    console.log('📊 [STUDENT_DASHBOARD] Current user from localStorage:', {
+      exists: !!currentUser,
+      user: currentUser ? {
+        id: currentUser.id,
+        role: currentUser.role,
+        name: currentUser.name,
+        additional_roles: currentUser.additional_roles
+      } : 'null'
+    });
+    
+    if (!currentUser) {
+      console.error('❌ [STUDENT_DASHBOARD] No current user found! Dashboard rendering without user context.');
+    }
+  }, []);
 
   const handleTicketDownload = () => {
     setTimeout(() => {
